@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        body {
+            background-color: #d3d3d3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .html {
+            color: #2c2b2b;
+            font-size: 62.5%;
+        }
+        button {
+            height: 2.5rem;
+            border-radius: 25px;
+            background-color: #ffd700;
+            border: 2px solid #ffa500;
+            margin: 0.5rem;
+            padding: 0.6rem 2rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background-color: #ffa500;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .main_todo_div {
+            width: 36rem;
+            display: grid;
+            grid-template-columns: 1fr 0.3fr;
+            align-items: center;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>TODO - LIST</h1>
+    <div>
+        <input type="text" id="inputValue" />
+        <button class="btn">ADD TO-DO</button>
+    </div>
+    <section class="todo-lists-elem"></section>
+    <script>
+        const mainTodoElem = document.querySelector(".todo-lists-elem");
+        const inputValue = document.getElementById("inputValue");
+
+        // Initialize LocalTodoLists from localStorage or empty array
+        let LocalTodoLists = JSON.parse(localStorage.getItem("TodoList")) || [];
+
+        // Save to localStorage
+        const saveToLocalStorage = () => {
+            localStorage.setItem("TodoList", JSON.stringify(LocalTodoLists));
+        };
+
+        // Add todo item to DOM
+        const addTodoToDOM = (todoText) => {
+            const divElement = document.createElement('div');
+            divElement.classList.add("main_todo_div");
+            divElement.innerHTML = `
+                <li>${todoText}</li>
+                <button class="deleteBtn">Delete</button>
+            `;
+            
+            // Add delete functionality
+            const deleteBtn = divElement.querySelector('.deleteBtn');
+            deleteBtn.addEventListener('click', () => {
+                divElement.remove();
+                LocalTodoLists = LocalTodoLists.filter(item => item !== todoText);
+                saveToLocalStorage();
+            });
+
+            mainTodoElem.append(divElement);
+        };
+
+        // Add new todo
+        const addTodoList = (e) => {
+            e.preventDefault();
+            const todoText = inputValue.value.trim();
+            
+            if (todoText && !LocalTodoLists.includes(todoText)) {
+                LocalTodoLists.push(todoText);
+                saveToLocalStorage();
+                addTodoToDOM(todoText);
+                inputValue.value = '';
+            }
+        };
+
+        // Load todos from localStorage on page load
+        const loadTodos = () => {
+            LocalTodoLists.forEach(todo => addTodoToDOM(todo));
+        };
+
+        // Event listeners
+        document.querySelector(".btn").addEventListener('click', addTodoList);
+        inputValue.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTodoList(e);
+            }
+        });
+
+        // Initial load
+        loadTodos();
+    </script>
+</body>
+</html>
